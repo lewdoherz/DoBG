@@ -42,6 +42,24 @@ Run provisioning only after deploying the current checkout, so its migration ima
 ssh fotj-oci "sudo cat /etc/game-shelf/initial-owner-password"
 ```
 
+## BoardGameGeek setup
+
+The production Compose environment forwards all three BGG settings to the server; it does not enable access merely because the code is deployed. No BGG token, approval, or official logo URL was present during setup. Do not bypass the authorization gate or substitute fixture results.
+
+1. Sign in to BoardGameGeek and follow [Using the XML API](https://boardgamegeek.com/using_the_xml_api) to register an application. Use `Game Shelf` and `https://bg.lewsherz.org`; describe a physical board-game collection catalog using XML API2 title search and game details, without barcode lookup. Request the appropriate commercial/non-commercial authorization for the actual use. BGG states approval may take a week or more; deployment cannot grant that approval.
+2. Review the current [API terms](https://boardgamegeek.com/wiki/page/XML_API_Terms_of_Use) and obtain the official **Powered by BGG** asset linked from the API guide. The app displays the configured logo with a link to BoardGameGeek. Use a stable HTTPS asset URL permitted by BGG, not a fabricated logo or a temporary Google Drive preview URL.
+3. After approval, edit `/etc/game-shelf/production.env` using a private operator session (`sudoedit /etc/game-shelf/production.env`). Add `BGG_API_TOKEN` with the issued bearer token, set `BGG_INTEGRATION_APPROVED=true`, and add `BGG_ATTRIBUTION_LOGO_URL` with the official permitted HTTPS image URL. Keep the file root-owned, mode 600. Do not paste the token in chat, a shell command, Git, screenshots, or logs.
+4. Recreate the application with the existing release image; restarting an existing container alone does not reload Compose environment values:
+
+```sh
+sudo sh -c 'export GAME_SHELF_IMAGE=$(docker inspect --format "{{.Config.Image}}" game-shelf-app-1); docker compose --project-directory /opt/game-shelf --env-file /etc/game-shelf/production.env -f /opt/game-shelf/compose.production.yaml up -d --no-deps --no-build --wait app'
+```
+
+5. Sign in and search for a known title, inspect its details and attribution, then add it to the collection. Check edition fields remain unknown when unavailable. The authenticated `/api/metadata?status=1` response should report `configured: true`; this indicates settings are present, not that BGG accepted the token. A successful live search and details request are required before claiming the integration works.
+
+Direct automated reads of BGG's guide/terms returned HTTP 403; indexed official guidance confirmed registration, authorization, attribution, and approval timing. Browser relay access was unavailable, so no BGG account application, terms acceptance, or approval was performed on the owner's behalf. Manual collection management remains available while awaiting authorization.
+
+
 ## Backup and restore
 
 ```sh
