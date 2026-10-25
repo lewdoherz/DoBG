@@ -1,5 +1,7 @@
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
+# Keep native installer file handoff on libuv's threadpool path on Linux overlayfs.
+ENV UV_USE_IO_URING=0
 COPY package*.json ./
 RUN npm ci
 COPY . .
