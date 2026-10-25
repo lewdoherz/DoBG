@@ -1,0 +1,39 @@
+{
+  "name": "game-shelf",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --webpack --hostname 0.0.0.0",
+    "build": "next build --webpack",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "1.7.12",
+    "@electric-sql/pglite": "^0.3.0",
+    "better-auth": "1.7.12",
+    "drizzle-orm": "^0.45.0",
+    "fast-xml-parser": "^5.3.0",
+    "lucide-react": "^0.577.0",
+    "next": "16.4.3",
+    "pg": "^8.16.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.16.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "axe-core": "^4.14.0",
+    "prettier": "^3.9.10",
+    "sharp": "^0.34.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.0"
+  }
+}

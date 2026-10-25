@@ -1,0 +1,16 @@
+node_modules/
+.next/
+.data/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+test-results/
+.ssh/
+.oci/
+*.pem
+*.key
+*.env
+*.dump
+game-shelf-*.json
+backups/

@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS "user" (id text PRIMARY KEY, name text NOT NULL, email text NOT NULL UNIQUE, "emailVerified" boolean NOT NULL DEFAULT false, image text, "createdAt" timestamp NOT NULL DEFAULT now(), "updatedAt" timestamp NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS session (id text PRIMARY KEY, "expiresAt" timestamp NOT NULL, token text NOT NULL UNIQUE, "createdAt" timestamp NOT NULL DEFAULT now(), "updatedAt" timestamp NOT NULL DEFAULT now(), "ipAddress" text, "userAgent" text, "userId" text NOT NULL REFERENCES "user"(id) ON DELETE CASCADE);
+CREATE INDEX IF NOT EXISTS session_user_id_idx ON session("userId");
+CREATE TABLE IF NOT EXISTS account (id text PRIMARY KEY, "accountId" text NOT NULL, "providerId" text NOT NULL, "userId" text NOT NULL REFERENCES "user"(id) ON DELETE CASCADE, "accessToken" text, "refreshToken" text, "idToken" text, "accessTokenExpiresAt" timestamp, "refreshTokenExpiresAt" timestamp, scope text, password text, "createdAt" timestamp NOT NULL DEFAULT now(), "updatedAt" timestamp NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS account_user ON account("userId");
+CREATE TABLE IF NOT EXISTS verification (id text PRIMARY KEY, identifier text NOT NULL, value text NOT NULL, "expiresAt" timestamp NOT NULL, "createdAt" timestamp NOT NULL DEFAULT now(), "updatedAt" timestamp NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS "rateLimit" (id text PRIMARY KEY, key text NOT NULL UNIQUE, count jsonb NOT NULL, "lastRequest" jsonb NOT NULL);
+CREATE TABLE IF NOT EXISTS game (id text PRIMARY KEY, owner_id text NOT NULL REFERENCES "user"(id) ON DELETE CASCADE, identity text NOT NULL, user_metadata jsonb NOT NULL, source jsonb);
+CREATE UNIQUE INDEX IF NOT EXISTS game_owner_identity ON game(owner_id,identity);
+CREATE TABLE IF NOT EXISTS edition (id text PRIMARY KEY, game_id text NOT NULL REFERENCES game(id) ON DELETE CASCADE, data jsonb NOT NULL);
+CREATE TABLE IF NOT EXISTS collection_entry (id text PRIMARY KEY, export_id text NOT NULL, owner_id text NOT NULL REFERENCES "user"(id) ON DELETE CASCADE, game_id text NOT NULL UNIQUE REFERENCES game(id) ON DELETE CASCADE, edition_id text NOT NULL REFERENCES edition(id), personal jsonb NOT NULL, updated_at timestamp NOT NULL DEFAULT now());
+CREATE UNIQUE INDEX IF NOT EXISTS entry_owner_export ON collection_entry(owner_id,export_id);
+CREATE TABLE IF NOT EXISTS physical_copy (id text PRIMARY KEY, entry_id text NOT NULL REFERENCES collection_entry(id) ON DELETE CASCADE, edition_id text NOT NULL REFERENCES edition(id), location text NOT NULL);
+CREATE INDEX IF NOT EXISTS copy_entry ON physical_copy(entry_id);
+CREATE TABLE IF NOT EXISTS provider_cache (key text PRIMARY KEY, payload jsonb NOT NULL, expires_at timestamp NOT NULL, created_at timestamp NOT NULL DEFAULT now());

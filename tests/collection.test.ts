@@ -1,0 +1,21 @@
+import { test, after } from 'node:test';
+import assert from 'node:assert/strict';
+import { getDb, getStore } from '../src/lib/db';
+import { user } from '../src/lib/schema';
+import { saveEntry, listEntries } from '../src/lib/collection';
+import { entrySchema, emptyMetadata, emptyEdition } from '../src/lib/model';
+process.env.PGLITE_PATH = 'memory://';
+after(async () => { await (await getStore()).close(); });
+test('editing notes preserves physical-copy identities, editions, and user-defined order', async () => {
+  const db = await getDb();
+  await db.insert(user).values({ id: 'copy-owner', name: 'Owner', email: 'owner@example.test' });
+  const input = entrySchema.parse({ metadata: { ...emptyMetadata(), title: 'A custom game' }, status: 'owned', edition: emptyEdition(), copies: [{ location: 'First shelf', edition: { name: 'Original', language: '中文', publisher: '' } }, { location: 'Second shelf', edition: { name: 'Reprint', language: 'English', publisher: '' } }] });
+  const id = await saveEntry('copy-owner', input);
+  const before = (await listEntries('copy-owner'))[0];
+  await saveEntry('copy-owner', { ...before, notes: 'Only notes changed', copies: [...before.copies].reverse() }, id);
+  const after = (await listEntries('copy-owner'))[0];
+  assert.equal(after.notes, 'Only notes changed');
+  assert.deepEqual(after.copies.map(c => c.id), before.copies.map(c => c.id).reverse());
+  assert.deepEqual(after.copies.map(c => c.edition.language), ['English', '中文']);
+  assert.deepEqual(after.copies.map(c => c.location), ['Second shelf', 'First shelf']);
+});

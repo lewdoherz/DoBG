@@ -1,0 +1,33 @@
+// Keep interface copy in a locale dictionary; titles and aliases are never translated automatically.
+export const en = {
+  app: 'Game Shelf',
+  tagline: 'Good games. Great company.',
+  collection: 'My collection',
+  owned: 'On my shelf',
+  wishlist: 'Wishlist',
+  play: 'Find a game',
+  add: 'Add a game',
+  search: 'Search titles, 中文名, tags…',
+  all: 'All games',
+  grid: 'Grid view',
+  list: 'List view',
+  unknown: 'Not recorded',
+  emptyTitle: 'A little space for your next favorite.',
+  emptyBody:
+    'Start with a game you love. Add it by title or make a custom entry — every great collection starts with one box.',
+  noResults: 'No games fit just yet.',
+  noResultsBody:
+    'Try another title or loosen a filter. Games with unknown play details are excluded from play-fit results.',
+  manual: 'Add manually',
+  save: 'Save to my shelf',
+  cancel: 'Cancel',
+  loading: 'Opening your shelf…',
+  offline: 'Offline · read-only snapshot',
+  stale: 'Could not refresh · showing saved snapshot',
+  export: 'Export collection',
+  import: 'Import collection',
+  signOut: 'Sign out',
+  details: 'Game details',
+  edit: 'Edit game',
+  private: 'Only you can see this collection',
+} as const;

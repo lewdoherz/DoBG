@@ -1,0 +1,74 @@
+name: game-shelf
+
+x-app-environment: &app-environment
+  NODE_ENV: production
+  NEXT_TELEMETRY_DISABLED: '1'
+  DATABASE_URL: postgres://gameshelf:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@db:5432/gameshelf
+  BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET}
+  BETTER_AUTH_URL: https://bg.lewsherz.org
+  DISABLE_SIGNUP: ${DISABLE_SIGNUP:-true}
+  BGG_INTEGRATION_APPROVED: 'false'
+
+services:
+  db:
+    image: postgres:17.11-alpine3.23
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gameshelf
+      POSTGRES_DB: gameshelf
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U gameshelf -d gameshelf']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging:
+      driver: json-file
+      options: { max-size: '10m', max-file: '3' }
+
+  migrate:
+    image: ${GAME_SHELF_MIGRATION_IMAGE:-game-shelf-migrate:local}
+    build:
+      context: .
+      target: build
+    profiles: [tools]
+    environment: *app-environment
+    command: ['npm', 'run', 'db:migrate']
+    depends_on:
+      db: { condition: service_healthy }
+
+  app:
+    image: ${GAME_SHELF_IMAGE:-game-shelf:local}
+    build:
+      context: .
+      target: runtime
+    restart: unless-stopped
+    environment: *app-environment
+    depends_on:
+      db: { condition: service_healthy }
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'fetch("http://127.0.0.1:3000/").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))']
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 5
+    logging:
+      driver: json-file
+      options: { max-size: '10m', max-file: '3' }
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: ['tunnel', '--no-autoupdate', 'run']
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?Set TUNNEL_TOKEN}
+    depends_on:
+      app: { condition: service_healthy }
+    logging:
+      driver: json-file
+      options: { max-size: '10m', max-file: '3' }
+
+volumes:
+  postgres:

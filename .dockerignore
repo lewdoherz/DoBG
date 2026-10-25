@@ -1,0 +1,15 @@
+node_modules
+.next
+.data
+.env
+.env.*
+.git
+test-results
+*.tsbuildinfo
+.ssh
+.oci
+*.pem
+*.key
+*.env
+*.dump
+backups
