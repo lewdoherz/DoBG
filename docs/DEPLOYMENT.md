@@ -6,7 +6,7 @@ Live: **https://bg.lewsherz.org**. Source: https://github.com/lewdoherz/DoBG (pu
 
 The existing Oracle ARM64 Ubuntu VM already runs other applications, Nginx on 80/443, and PostgreSQL on host loopback. Game Shelf uses its own Compose project (`game-shelf`), PostgreSQL 17 container/volume, application container, and a dedicated Cloudflare Tunnel. No host ports are published; existing sites, tunnels, databases, firewall rules, and Nginx configuration are not replaced. Cloudflare terminates public HTTPS; an encrypted outbound tunnel reaches the private Docker network and `http://app:3000`. The tunnel has only `bg.lewsherz.org` plus a 404 catch-all, not a wildcard route.
 
-The source checkout lives at `/opt/game-shelf`. Runtime credentials live only in `/etc/game-shelf/production.env` (root-only), outside the repository/build context. Fields: random URL-safe `POSTGRES_PASSWORD`, random `BETTER_AUTH_SECRET`, tunnel-specific `TUNNEL_TOKEN`, and `DISABLE_SIGNUP=true`. Public `BETTER_AUTH_URL` is fixed to the requested HTTPS origin in Compose. BGG remains disabled until separately approved/configured. Neither the Cloudflare account API token nor any GitHub token is needed by the running application or stored in this environment file.
+The source checkout lives at `/opt/game-shelf`. Runtime credentials live only in `/etc/game-shelf/production.env` (root-only), outside the repository/build context. Fields: random URL-safe `POSTGRES_PASSWORD`, random `BETTER_AUTH_SECRET`, tunnel-specific `TUNNEL_TOKEN`, and `DISABLE_SIGNUP=false`. Public `BETTER_AUTH_URL` is fixed to the requested HTTPS origin in Compose. BGG remains disabled until separately approved/configured. Neither the Cloudflare account API token nor any GitHub token is needed by the running application or stored in this environment file.
 
 ## Deploy/update
 
@@ -28,7 +28,7 @@ Do not run/print `docker compose config` without `--quiet`, `docker inspect` env
 
 ## Accounts
 
-Public registration is closed by default. Operator provisioning accepts JSON on stdin inside the migration/tool image:
+Public registration is enabled in production at the owner's request (`DISABLE_SIGNUP=false` in the persistent environment file). Compose still defaults to closed registration for an unconfigured deployment. The existing application image was recreated without rebuilding or restarting the database/tunnel. Real public HTTPS signup and authenticated access to the new account's collection both returned HTTP 200; the temporary verification account was signed out and removed. Email verification/recovery remains unconfigured. Optional operator provisioning accepts JSON on stdin inside the migration/tool image:
 
 ```sh
 sudo sh -c 'GAME_SHELF_MIGRATION_IMAGE="game-shelf-migrate:$(git -C /opt/game-shelf rev-parse --short=12 HEAD)" docker compose --project-directory /opt/game-shelf --env-file /etc/game-shelf/production.env -f /opt/game-shelf/compose.production.yaml run --rm -T migrate npx tsx scripts/create-account.ts < /root/protected-account-input.json'

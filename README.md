@@ -51,7 +51,7 @@ Metadata search never returns local fixtures as live results. When unavailable, 
 
 ## Deploy on the existing Oracle VM
 
-Production is live at **https://bg.lewsherz.org**, using the existing Oracle ARM64 VM, an isolated PostgreSQL container, and a dedicated Cloudflare Tunnel. No new Oracle instance or public database/app port is needed; existing Nginx sites remain untouched. Public registration is closed. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for owner access, the release command, private credential locations, account provisioning, daily backup/restore, rollback, and hostname-scoped HTTPS routing.
+Production is live at **https://bg.lewsherz.org**, using the existing Oracle ARM64 VM, an isolated PostgreSQL container, and a dedicated Cloudflare Tunnel. No new Oracle instance or public database/app port is needed; existing Nginx sites remain untouched. Public registration is enabled at the owner's request; each account has its own private collection. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for owner access, the release command, private credential locations, account provisioning, daily backup/restore, rollback, and hostname-scoped HTTPS routing.
 
 ## Alternative managed deployment: Node + PostgreSQL
 

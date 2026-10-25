@@ -23,7 +23,7 @@ Canonical game and edition are separate records; collection entries hold persona
 
 Offline: an authenticated successful collection snapshot is stored in this browser for read-only use. Sign-out clears it. App shell/static assets are service-worker cached; auth/API responses are never service-worker cached. Offline state and snapshot timestamp stay visible. This is not offline editing or a full encrypted backup. Use a trusted device; clear browser data on shared computers.
 
-Deployment: one Node service plus isolated PostgreSQL on the existing Oracle VM, exposed only through a dedicated Cloudflare Tunnel at https://bg.lewsherz.org. No app/database host ports are published; HTTP redirects to HTTPS for this hostname only. Root-only runtime secrets live outside Git, public registration is closed, and private daily local backups have a tested restore path. Encrypted offsite recovery remains to configure. No required object storage in M1. Managed PostgreSQL remains an alternative, not an additional deployed service. See DEPLOYMENT.md and README.md for operations/costs. Native packaging remains possible because the browser calls ordinary authenticated JSON APIs.
+Deployment: one Node service plus isolated PostgreSQL on the existing Oracle VM, exposed only through a dedicated Cloudflare Tunnel at https://bg.lewsherz.org. No app/database host ports are published; HTTP redirects to HTTPS for this hostname only. Root-only runtime secrets live outside Git, public registration is enabled at the owner's request, and private daily local backups have a tested restore path. Encrypted offsite recovery remains to configure. No required object storage in M1. Managed PostgreSQL remains an alternative, not an additional deployed service. See DEPLOYMENT.md and README.md for operations/costs. Native packaging remains possible because the browser calls ordinary authenticated JSON APIs.
 
 ## Milestone checklist
 
@@ -33,7 +33,7 @@ Deployment: one Node service plus isolated PostgreSQL on the existing Oracle VM,
 - [x] M1 search/filter, grid/list, play-fit filters
 - [x] M1 versioned import/export + offline read + PWA manifest/icons (physical-device installation not tested)
 - [x] M1 meaningful API/browser/accessibility checks and operator docs — see VERIFICATION.md for evidence and external prerequisites
-- [x] M1 pushed to GitHub and deployed on Oracle ARM64 with HTTPS, private PostgreSQL, closed registration, daily local backups, and an exercised dump/restore
+- [x] M1 pushed to GitHub and deployed on Oracle ARM64 with HTTPS, private PostgreSQL, configurable registration, daily local backups, and an exercised dump/restore
 - [ ] M2 photos, recognition, safe code capture (not implemented)
 - [ ] M3 selective revocable sharing + PNG cards (not implemented)
 - [ ] M4 invitations, guest authorization, transactional capacity (not implemented)
