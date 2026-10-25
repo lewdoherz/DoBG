@@ -6,7 +6,7 @@ Milestone 1: a private physical board-game library, usable in an ordinary browse
 
 ## Assumptions
 
-- Empty repository; no existing instructions, code, credentials, or infrastructure.
+- Implementation started from an empty repository. Deployment now reuses the owner's existing Oracle ARM64 VM and Cloudflare domain, with a dedicated isolated Compose stack rather than replacing other workloads.
 - English UI initially; English/Chinese names and aliases are first-class. Primary navigation/copy lives in a locale dictionary; component-specific prose remains ready for later extraction. No full Chinese UI or language switcher is claimed.
 - Email/password accounts using Better Auth. No email-delivery service is assumed. Registration works without verification; password recovery requires an administrator until an email service is added. Public deployments must consciously configure registration policy.
 - One backend synchronizes all devices. Embedded PGlite is for a single-process local review only; deployed instances require PostgreSQL.
@@ -23,7 +23,7 @@ Canonical game and edition are separate records; collection entries hold persona
 
 Offline: an authenticated successful collection snapshot is stored in this browser for read-only use. Sign-out clears it. App shell/static assets are service-worker cached; auth/API responses are never service-worker cached. Offline state and snapshot timestamp stay visible. This is not offline editing or a full encrypted backup. Use a trusted device; clear browser data on shared computers.
 
-Deployment: one Node service plus managed PostgreSQL behind HTTPS. No required object storage in M1. Dockerfile targets a conventional container host. Cost planning and operational procedures are in README.md. Native packaging remains possible because the browser calls ordinary authenticated JSON APIs.
+Deployment: one Node service plus isolated PostgreSQL on the existing Oracle VM, exposed only through a dedicated Cloudflare Tunnel at https://bg.lewsherz.org. No app/database host ports are published; HTTP redirects to HTTPS for this hostname only. Root-only runtime secrets live outside Git, public registration is closed, and private daily local backups have a tested restore path. Encrypted offsite recovery remains to configure. No required object storage in M1. Managed PostgreSQL remains an alternative, not an additional deployed service. See DEPLOYMENT.md and README.md for operations/costs. Native packaging remains possible because the browser calls ordinary authenticated JSON APIs.
 
 ## Milestone checklist
 
@@ -33,6 +33,7 @@ Deployment: one Node service plus managed PostgreSQL behind HTTPS. No required o
 - [x] M1 search/filter, grid/list, play-fit filters
 - [x] M1 versioned import/export + offline read + PWA manifest/icons (physical-device installation not tested)
 - [x] M1 meaningful API/browser/accessibility checks and operator docs — see VERIFICATION.md for evidence and external prerequisites
+- [x] M1 pushed to GitHub and deployed on Oracle ARM64 with HTTPS, private PostgreSQL, closed registration, daily local backups, and an exercised dump/restore
 - [ ] M2 photos, recognition, safe code capture (not implemented)
 - [ ] M3 selective revocable sharing + PNG cards (not implemented)
 - [ ] M4 invitations, guest authorization, transactional capacity (not implemented)

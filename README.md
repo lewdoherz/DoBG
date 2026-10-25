@@ -51,7 +51,7 @@ Metadata search never returns local fixtures as live results. When unavailable, 
 
 ## Deploy on the existing Oracle VM
 
-The production target is **https://bg.lewsherz.org**, using the existing Oracle ARM64 VM, an isolated PostgreSQL container, and a dedicated Cloudflare Tunnel. No new Oracle instance or public database/app port is needed; existing Nginx sites remain untouched. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the release command, private credential locations, account provisioning, backup/restore, rollback, and Cloudflare routing.
+Production is live at **https://bg.lewsherz.org**, using the existing Oracle ARM64 VM, an isolated PostgreSQL container, and a dedicated Cloudflare Tunnel. No new Oracle instance or public database/app port is needed; existing Nginx sites remain untouched. Public registration is closed. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for owner access, the release command, private credential locations, account provisioning, daily backup/restore, rollback, and hostname-scoped HTTPS routing.
 
 ## Alternative managed deployment: Node + PostgreSQL
 
@@ -63,7 +63,7 @@ A paid Render Node web service and managed PostgreSQL in the same region is an a
 4. Create the intended accounts, set `DISABLE_SIGNUP=true`, restart. Verify a second browser can sign in and access the same account; another account must see no entries.
 5. Check `/`, `/manifest.webmanifest`, auth, manual add/edit, import/export, and sign-out in the deployed environment. Do not enable BGG until its authorization gate is satisfied.
 
-A Dockerfile is included for the standard `next start` Node runtime, matching `npm start` locally. Run migrations **from a checkout with dependencies or the Docker build stage**, not the production-only runtime image: `npm run db:migrate`. For a release image: `docker build --target build -t game-shelf-release .`, then run that image with the database secret and command `npm run db:migrate`. Deploy the final runtime image with `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `PORT=3000`. It includes SQL migrations but does not mutate the production schema automatically. Docker/managed deployment was not executed on this workstation.
+A Dockerfile is included for the standard `next start` Node runtime, matching `npm start` locally. Run migrations **from a checkout with dependencies or the Docker build stage**, not the production-only runtime image: `npm run db:migrate`. For a release image: `docker build --target build -t game-shelf-release .`, then run that image with the database secret and command `npm run db:migrate`. Deploy the final runtime image with `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `PORT=3000`. It includes SQL migrations but does not mutate the production schema automatically. The Oracle ARM64 Docker/PostgreSQL deployment was exercised on the actual server; the alternative managed-host deployment was not.
 
 Budget reference: [Render's official July 2026 cost example](https://render.com/articles/how-much-does-cloud-application-hosting-cost-for-small-businesses) puts Starter web + Basic-256mb PostgreSQL at approximately **US$13/month**, before storage/bandwidth growth. [Current pricing](https://render.com/pricing) lists Starter web at $7/month; database storage and egress are separate. Allow roughly $15–25/month for a small private deployment plus a domain if desired; this is a planning allowance, not a quote or measured bill. More RAM may be needed for builds. No object storage, Redis, worker, recognition subscription, or email provider is required for M1. Add private S3-compatible storage with explicit retention policy only in M2.
 
@@ -73,7 +73,7 @@ Budget reference: [Render's official July 2026 cost example](https://render.com/
 
 ## Backup and restore
 
-**Production full backup:** use provider-managed point-in-time recovery plus a daily encrypted offsite PostgreSQL dump. Example with PostgreSQL client tools (not bundled):
+**Production backup plan:** Oracle currently has daily private local dumps and a tested disposable-database restoration; encrypted offsite copies and point-in-time recovery are not configured. Local dumps do not protect against VM/disk loss. Add encrypted offsite PostgreSQL dumps and provider-managed recovery where available. Example with PostgreSQL client tools (not bundled):
 
 ```sh
 pg_dump --format=custom --no-owner --file=game-shelf.dump "$DATABASE_URL"
@@ -81,7 +81,7 @@ pg_dump --format=custom --no-owner --file=game-shelf.dump "$DATABASE_URL"
 pg_restore --no-owner --dbname="$RESTORE_DATABASE_URL" game-shelf.dump
 ```
 
-Backups include account/password hashes, sessions, private notes, and locations; restrict access, encrypt, and set retention. Preserve the auth secret separately in a secret manager. Do a quarterly restore drill against a disposable database; sign in and compare exported entries/copies/notes. Rotate/revoke sessions after suspected compromise. Restoring the same auth secret can preserve old sessions; choose consciously. Production dump/restore has not been run here because PostgreSQL tooling/service was not available.
+Backups include account/password hashes, sessions, private notes, and locations; restrict access, encrypt, and set retention. Preserve the auth secret separately in a secret manager. Do a quarterly restore drill against a disposable database; sign in and compare exported entries/copies/notes. Rotate/revoke sessions after suspected compromise. Restoring the same auth secret can preserve old sessions; choose consciously. A real production PostgreSQL dump/restore and account/entry/copy count comparison passed during Oracle deployment; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 **Local full backup:** stop the server, copy the whole `.data/postgres` directory to a protected backup location, then restart. Restore only while stopped and with a compatible PGlite version, to a separate directory first (`PGLITE_PATH`); verify login and exported records. Never copy an actively written PGlite directory or open it from two processes.
 

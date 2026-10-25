@@ -50,12 +50,24 @@ Real Chromium, ordinary browser mode, against the running app:
 
 All review games were clearly titled `Review fixture · …`, manually entered/imported, and removed after review. No review data is seeded by application startup or migrations.
 
+### Oracle production deployment
+
+The public application was deployed to **https://bg.lewsherz.org** from `main` in https://github.com/lewdoherz/DoBG, on the existing Oracle ARM64 Ubuntu VM. PostgreSQL, app, and Cloudflare Tunnel run in an isolated Compose project, with no published app/database host ports. Other workloads were not replaced. A hostname-only Cloudflare rule redirects HTTP to HTTPS without altering zone-wide SSL or other sites.
+
+Executed on the actual host: Docker release build and TypeScript compilation, all three migrations, ten passing regressions, patched Sharp 0.35.5 icon generation, and zero reported runtime dependency vulnerabilities. The Linux overlayfs native-installer `ETXTBSY` failure was fixed using libuv's threadpool filesystem path; the full build then passed without suppressing install scripts.
+
+Real HTTPS requests verified owner login and an empty collection, Secure/HttpOnly session cookies, anonymous denial, separate-account read/update denial, cross-origin denial, persistent add/edit with two copies, duplicate 409, portable export/import, repeat-import skipping, invalid import 400, unavailable BGG 503, and disabled public registration.
+
+Real Chromium against the deployed URL verified a 390px-wide collection with no horizontal overflow, a saved mobile edit, offline reload/read-only timestamp, and the edit plus two copies surviving replacement by the patched production container. Sign-out removed the local snapshot.
+
+A real `pg_dump --format=custom` was restored with `pg_restore --no-owner --exit-on-error` into a disposable database. Source/restored account, entry, and physical-copy counts matched at `3 / 2 / 4`. The temporary database, both test accounts and their collection data, and the test-data dump were removed. Final production counts were `1 / 0 / 0` and a clean root-only backup was created. The daily 03:17 UTC cron job is installed and cron was verified active. This proves local restoration, not offsite disaster recovery.
+
 ## Not exercised / external prerequisites
 
 - **Live BGG**: no token or application approval supplied. Official access/terms direct fetches returned HTTP 403; indexed official sources informed the gated implementation. The operator must review the complete current terms, secure approval, provide the official attribution asset, and check real search/details/covers before enabling it. Commercial use needs separate authorization.
-- **Production PostgreSQL, Docker, hosting, managed backups and restoration**: documented and implemented configuration/migrations, but no Docker/psql binaries or database/hosting credentials were available. Local PGlite is not evidence of a real PostgreSQL network/TLS or managed restore test. Run the documented release and restore drill before trusting a deployed collection.
+- **Offsite/host-loss recovery and alternative hosting**: the actual Oracle Docker/PostgreSQL deployment and disposable restore were exercised, but encrypted offsite backups, point-in-time recovery, full VM-loss restoration, and the alternative Render/managed-PostgreSQL deployment were not.
 - **Physical Android/iOS/WeChat**: none tested. Viewport emulation is not device testing. Actual install menus, Safari home-screen lifecycle/storage eviction, touch keyboards, accessibility technology and WeChat's embedded browser need hands-on checks. No automatic WeChat previews/sending are promised.
-- **Email verification/recovery**: no mail service configured; registration is unverified and self-service recovery is unavailable. Use a password manager, close registration after provisioning intended accounts, and plan email delivery before wider use.
+- **Email verification/recovery**: no mail service configured; registration is unverified and self-service recovery is unavailable. Production registration is closed after provisioning the owner. Retrieve the initial password over trusted SSH as documented in DEPLOYMENT.md and keep it in a password manager.
 - **Offline security**: the browser snapshot is plaintext localStorage on a trusted profile, not encrypted storage. No offline editing queue, conflict resolution, push notifications, or cross-device real-time subscription is claimed. Refresh/reopen/focus/reconnect retrieves the shared backend state.
 - **Localization**: Unicode search and a primary-copy dictionary are implemented; a full Chinese UI, locale selector and transliteration are not.
 - **M2–M4**: no uploads, recognition, barcode/QR lookup, public sharing, invitation capacity or chat implementation is implied by M1. Their requirements remain in the project checklist.
@@ -66,6 +78,6 @@ See README.md for commands, environment setup, costs, migrations, backup/restore
 
 Recommended next milestone: **M2 photo/code capture**, after reviewing M1 on the intended deployment/devices. Select recognition only after separately verifying image/text capabilities, cost, credentials and retention; keep keys server-side, provide confirmation and manual fallbacks, and never fetch/navigate arbitrary QR URLs automatically. Do not skip ahead to sharing or invitations before that decision and verification.
 
-## Final local review state
+## Final review state
 
-The local development preview is available at http://localhost:3000. Create a new account to review a clean collection. Temporary browser-import files and the temporary production-mode environment/secret were removed. Empty smoke/review accounts may remain in the ignored local development database; their review collection entries were removed. No live integration credentials were supplied or committed.
+Review **https://bg.lewsherz.org** using the provisioned owner account, not a public registration flow. Production contains only the intended owner and an empty collection; deployment verification accounts/data were removed. Runtime secrets and the initial password are root-only files outside Git. The supplied Cloudflare/GitHub tokens should be rotated because they were shared in chat. Existing GitHub CLI authorization was used for publication; the supplied classic PAT was not usable. No token values were committed or included in this handoff. The original local review database is separate, ignored development data; a local preview is not assumed to be running.
