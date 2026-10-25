@@ -3,6 +3,7 @@ import { getAuth } from '../src/lib/auth';
 import { getStore } from '../src/lib/db';
 
 // Operator-only stdin, never CLI arguments, committed files, or an HTTP bootstrap endpoint.
+process.stdin.setEncoding('utf8');
 let input = '';
 for await (const chunk of process.stdin) {
   input += chunk;

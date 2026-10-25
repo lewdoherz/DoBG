@@ -31,7 +31,7 @@ Do not run/print `docker compose config` without `--quiet`, `docker inspect` env
 Public registration is closed by default. Operator provisioning accepts JSON on stdin inside the migration/tool image:
 
 ```sh
-sudo docker compose --project-directory /opt/game-shelf --env-file /etc/game-shelf/production.env -f /opt/game-shelf/compose.production.yaml run --rm -T migrate npx tsx scripts/create-account.ts < /root/protected-account-input.json
+sudo sh -c 'docker compose --project-directory /opt/game-shelf --env-file /etc/game-shelf/production.env -f /opt/game-shelf/compose.production.yaml run --rm -T migrate npx tsx scripts/create-account.ts < /root/protected-account-input.json'
 ```
 
 The protected input contains `name`, `email`, `password`. Create it securely with mode 600, do not paste passwords into shell history, and remove the input afterward. The command prints only the created email, never its password/session token. It enables registration in that one CLI process only, not in the app. The intended owner is `lihp1987@gmail.com`; any generated initial password is kept in `/etc/game-shelf/initial-owner-password` (root-only) for retrieval over existing trusted SSH, not published in Git/chat. Email verification and mail-based password recovery are not configured. Keep the password in a password manager.
